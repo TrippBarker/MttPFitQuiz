@@ -1,0 +1,479 @@
+<meta>
+ 
+ <meta http-equiv="X-UA-Compatible" content="IE=edge">
+ 
+ <meta name="viewport" content="width=device-width" ,="" initial-scale="1.0">
+ 
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+ <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap" rel="stylesheet">
+ <style>
+  #fitQuiz, #emailDiv, #fitResults {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: "Barlow", sans-serif;
+        }
+        #question, #doneMsg, #career {
+            color: #31054C;
+            display: flex;
+            align-items: center;
+            font-size: 60px;
+            height: 240px;
+            text-align: center;
+        }
+        #career, #doneMsg {
+            align-items: flex-end;
+            margin: 0px;
+        }
+        #emailDiv h2 {
+            margin: 0px;
+            font-size: 30px;
+        }
+        #emailForm {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #emailForm input {
+            border: 1px solid #31054C;
+            border-radius: 6px;
+            margin-top: 1rem;
+            font-size: 24px;
+            width: 600px;
+        }
+        #results {
+            display: flex;
+            align-items: flex-start;
+            font-size: 45px;
+            height: 240px;
+            text-align: center;
+        }
+        #questionAns, #questionCtrls {
+            display: flex;
+            justify-content: center;
+        }
+        .fitButton {
+            color: #31054C;
+            height: 60px;
+            width: 150px;
+            font-size: 17px;
+            font-weight: bolder;
+            margin: 1rem;
+            border: none;
+            border-radius: 60px;
+            background-color: #1fcc00;
+        }
+        .fitButton:hover {
+            cursor: pointer;
+        }
+        .hidden {
+            height: 0px !important;
+            overflow: hidden !important;
+        }
+        .fitButton:disabled {
+            opacity: 40%;
+        }
+ </style>
+ <div id="fitQuiz">
+  <h1 id="question">
+   Loading...
+  </h1>
+  <div id="questionAns">
+   <button id="strDisBtn" class="fitButton" onclick="buttonClicked(2)">
+    Strong Dislike
+   </button>
+   <button id="disBtn" class="fitButton" onclick="buttonClicked(1)">
+    Dislike
+   </button>
+   <button id="nutBtn" class="fitButton" onclick="buttonClicked(3)">
+    Neutral
+   </button>
+   <button id="likBtn" class="fitButton" onclick="buttonClicked(4)">
+    Like
+   </button>
+   <button id="strLikBtn" class="fitButton" onclick="buttonClicked(5)">
+    Strong Like
+   </button>
+  </div>
+  <div id="questionCtrls">
+   <button id="backBtn" class="fitButton" onclick="prevQuestion()" disabled="">
+    Back
+   </button>
+   <button id="nextBtn" class="fitButton" onclick="nextQuestion()" disabled="">
+    Next
+   </button>
+  </div>
+ </div>
+ <div id="emailDiv" class="hidden" hidden="">
+  <h1 id="doneMsg">
+   You're
+   <br>
+   done!
+  </h1>
+  <h2>
+   To get your results, let us know where to send them.
+  </h2>
+  <div id="emailForm">
+   <input type="text" name="name" id="name" placeholder="Name" onkeyup="checkForm()">
+   <input type="text" name="email" id="email" placeholder="Email" onkeyup="checkForm()">
+   <button id="seeResBtn" class="fitButton" onclick="sendEmail()" disabled="">
+    See Results
+   </button>
+  </div>
+ </div>
+ <div id="fitResults" class="hidden" hidden="">
+  <h1 id="career">
+   Loading...
+  </h1>
+  <h2 id="results">
+  </h2>
+ </div>
+ <script>
+  let fitQuiz = document.getElementById('fitQuiz');
+        let question = document.getElementById('question');
+        let fitResults = document.getElementById('fitResults');
+        let emailDiv = document.getElementById('emailDiv');
+        let career = document.getElementById('career');
+        let results = document.getElementById('results');
+        let nextBtn = document.getElementById('nextBtn');
+        let backBtn = document.getElementById('backBtn');
+        let nameInp = document.getElementById('name');
+        let emailInp = document.getElementById('email');
+        let seeResBtn = document.getElementById('seeResBtn');
+        let leaderRes = "You have a natural management style that would excel when overseeing teams of developers, engineers, and subject matter experts. You are great at communicating, setting goals, and motivating others.";
+        let commRes = "You excel at breaking down technical concepts and communicating them in a way that is easy to understand for a non-technical audiences. You enjoy working with clients or customers and helping them make informed decisions.";
+        let probSolvRes = "You are driven by the desire to find solutions to complex problems.You are analytical, detail - oriented, and enjoy the challenge of figuring out how to make things work.";
+        let innovatorRes = "You are always looking for new and better ways of doing things. You are creative and enjoy thinking outside the box to come up with new ideas and approaches to problems.";
+        let resText = "";
+        let resType = "";
+        let probSolvScore = 40;
+        let leaderScore = 40;
+        let commScore = 40;
+        let innovatorScore = 40;
+        let questionOrder = [];
+        let orderIndex = 0;
+        let highestIndex = 0;
+        let userName = "";
+        let userEmail = "";
+        const probSolvAns = {
+            0: true,
+            1: true,
+            2: false,
+            3: false,
+            4: false,
+            5: true,
+            6: false,
+            7: true,
+            8: false,
+            9: true,
+            10: true,
+            11: false,
+            12: false,
+            13: false,
+            14: false,
+            15: false,
+            16: false,
+            17: false,
+            18: true,
+            19: true
+        }
+        const leaderAns = {
+            0: false,
+            1: true,
+            2: true,
+            3: true,
+            4: false,
+            5: true,
+            6: true,
+            7: true,
+            8: false,
+            9: true,
+            10: true,
+            11: true,
+            12: true,
+            13: true,
+            14: true,
+            15: false,
+            16: true,
+            17: true,
+            18: false,
+            19: false
+        }
+        const commAns = {
+            0: false,
+            1: false,
+            2: true,
+            3: true,
+            4: true,
+            5: true,
+            6: true,
+            7: true,
+            8: true,
+            9: false,
+            10: true,
+            11: false,
+            12: false,
+            13: true,
+            14: true,
+            15: true,
+            16: true,
+            17: true,
+            18: true,
+            19: false
+        }
+        const innovatorAns = {
+            0: true,
+            1: false,
+            2: true,
+            3: false,
+            4: true,
+            5: false,
+            6: false,
+            7: true,
+            8: false,
+            9: false,
+            10: true,
+            11: false,
+            12: false,
+            13: false,
+            14: false,
+            15: true,
+            16: true,
+            17: false,
+            18: true,
+            19: true
+        }
+        const questions = {
+            0: "I Enjoy: Direct interactions with other health care providers",
+            1: "I Enjoy: Prioritizing competing projects and deadlines",
+            2: "I Enjoy: Performing quality assurance on other people's work",
+            3: "I Enjoy: Answering emails in a timely manner",
+            4: "I Enjoy: Frequently traveling to customer sites for in person communication",
+            5: "I Enjoy: Manipulating data in Excel",
+            6: "I Enjoy: Creating quality PowerPoint presentations",
+            7: "I Enjoy: Explaining complicated, technical concepts to a non-technical audience",
+            8: "I Enjoy: Maintaining happy client accounts over time",
+            9: "I Enjoy: Getting month long project over the finish line",
+            10: "I Enjoy: Escalating concerns to a supervisor",
+            11: "I Enjoy: Creating training materials for new software",
+            12: "I Enjoy: Creating and curating analytic reports",
+            13: "I Enjoy: Creating a meeting agenda",
+            14: "I Enjoy: Creating and updating a project plan",
+            15: "I Enjoy: Connecting clients to resources needed to solve their problems",
+            16: "I Enjoy: Performing work remotely or from home",
+            17: "I Enjoy: Keeping detailed track of how I spend my day",
+            18: "I Enjoy: Troubleshooting software problems",
+            19: "I Enjoy: Collaborating with software developers to improve products"
+        }
+        let answers = {
+        }
+        for (let i = 0; i < 20; i++) {
+            let haveNum = false;
+            while (!haveNum) {
+                // let randNum = i;
+                let randNum = Math.floor(Math.random() * 20);
+                if (!questionOrder.includes(randNum)) {
+                    questionOrder.push(randNum);
+                    haveNum = true
+                }
+            }
+        }
+        function checkForm(){
+            userName = document.getElementById('name').value;
+            userEmail = document.getElementById('email').value;
+            console.log(userName);
+            console.log(userEmail);
+            if (userName.length > 0 && (userEmail.length > 0 && userEmail.includes("@") && (userEmail.includes(".com") || userEmail.includes(".org") || userEmail.includes(".net") || userEmail.includes(".co") || userEmail.includes(".edu")))) {
+                this.seeResBtn.disabled = false;
+            } else {
+                this.seeResBtn.disabled = true;
+            }
+        }
+        function sendEmail() {
+            userName = document.getElementById('name').value;
+            userEmail = document.getElementById('email').value;
+            if (userName.length == 0 || (userEmail.length > 0 && !userEmail.includes("@"))) {
+            } else {
+                this.emailDiv.classList.add('hidden');
+                this.fitResults.classList.remove('hidden');
+                let params = {
+                    user_id: 'A3wVFig2m4zoQA71p',
+                    service_id: 'MTTP',
+                    template_id: 'fit_quiz_email',
+                    template_params: {
+                        'to_email': userEmail,
+                        'resType': resType,
+                        'resText': resText
+                    }
+                };
+                let headers = {
+                    'Content-type': 'application/json'
+                };
+                let options = {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(params)
+                };
+                fetch('https://api.emailjs.com/api/v1.0/email/send', options)
+                    .then((httpResponse) => {
+                        if (httpResponse.ok) {
+                            console.log('Your mail is sent!');
+                        } else {
+                            return httpResponse.text()
+                                .then(text => Promise.reject(text));
+                        }
+                    })
+                    .catch((error) => {
+                        console.log('Oops... ' + error);
+                    });
+            }
+        }
+        function prevQuestion() {
+            if (orderIndex > 0) {
+                this.nextBtn.disabled = false;
+                orderIndex--;
+                if (orderIndex == 0){
+                    this.backBtn.disabled = true;
+                } else {
+                    this.backBtn.disabled = false;
+                }
+            }
+            currentQuestion = questionOrder[orderIndex];
+            question.textContent = questions[currentQuestion];
+            if (orderIndex == highestIndex){
+                this.nextBtn.disabled = true;
+            } else {
+                this.nextBtn.disabled = false;
+            }
+        }
+        function nextQuestion() {
+            if (orderIndex != 19) {
+                orderIndex++;
+                this.backBtn.disabled = false;
+                currentQuestion = questionOrder[orderIndex];
+                question.textContent = questions[currentQuestion];
+                if(orderIndex == 19){
+                    this.nextBtn.disabled = true;
+                }
+            }
+            if (orderIndex == highestIndex){
+                this.nextBtn.disabled = true;
+            } else {
+                this.nextBtn.disabled = false;
+            }
+        }
+        function buttonClicked(button) {
+            answers[currentQuestion] = button;
+            this.backBtn.disabled = false;
+            if (orderIndex < 19){
+                orderIndex++;
+                if (orderIndex > highestIndex){
+                    highestIndex = orderIndex;
+                }
+                currentQuestion = questionOrder[orderIndex];
+                question.textContent = questions[currentQuestion];
+            }
+            if (Object.keys(answers).length == 20) {
+                calcResults()
+            }
+            if (highestIndex == orderIndex){
+                this.nextBtn.disabled = true;
+            } else {
+                this.nextBtn.disabled = false;
+            }
+            console.log(Object.keys(answers).length);
+        }
+        function printRes() {
+            console.log("answers:")
+            for (let i = 0; i < 20; i++) {
+                console.log(i + " : " + answers[i]);
+            }
+        }
+        function calcResults() {
+            probSolvScore = 60;
+            leaderScore = 60;
+            commScore = 60;
+            innovatorScore = 60;
+            for (let i = 0; i < 20; i++) {
+                if (answers[i] == 3) {
+                    probSolvScore += 2;
+                    leaderScore += 2;
+                    commScore += 2;
+                    innovatorScore += 2;
+                } else if (answers[i] > 3) {
+                    if (probSolvAns[i]) {
+                        probSolvScore += answers[i] - 3;
+                    } else {
+                        probSolvScore -= answers[i] - 3;
+                    }
+                    if (leaderAns[i]) {
+                        leaderScore += answers[i] - 3;
+                    } else {
+                        leaderScore -= answers[i] - 3;
+                    }
+                    if (commAns[i]) {
+                        commScore += answers[i] - 3;
+                    } else {
+                        commScore -= answers[i] - 3;
+                    }
+                    if (innovatorAns[i]) {
+                        innovatorScore += answers[i] - 3;
+                    } else {
+                        innovatorScore -= answers[i] - 3;
+                    }
+                } else {
+                    if (!probSolvAns[i]) {
+                        probSolvScore += answers[i];
+                    } else {
+                        probSolvScore -= answers[i];
+                    }
+                    if (!leaderAns[i]) {
+                        leaderScore += answers[i];
+                    } else {
+                        leaderScore -= answers[i];
+                    }
+                    if (!commAns[i]) {
+                        commScore += answers[i];
+                    } else {
+                        commScore -= answers[i];
+                    }
+                    if (!innovatorAns[i]) {
+                        innovatorScore += answers[i];
+                    } else {
+                        innovatorScore -= answers[i];
+                    }
+                }
+            }
+            if (probSolvScore > 100) {
+                probSolvScore = 100;
+            }
+            if (leaderScore > 100) {
+                leaderScore = 100;
+            }
+            if (commScore > 100) {
+                commScore = 100;
+            }
+            if (innovatorScore > 100) {
+                innovatorScore = 100;
+            }
+            if (probSolvScore >= leaderScore && probSolvScore >= commScore && probSolvScore >= innovatorScore) {
+                this.results.textContent = probSolvRes;
+                this.career.textContent = "The Problem Solver";
+            } else if (leaderScore >= probSolvScore && leaderScore >= commScore && leaderScore >= innovatorScore) {
+                this.results.textContent = leaderRes;
+                this.career.textContent = "The Leader";
+            } else if (commScore >= probSolvScore && commScore >= leaderScore && commScore >= innovatorScore) {
+                this.results.textContent = commRes;
+                this.career.textContent = "The Communicator";
+            } else {
+                this.results.textContent = innovatorRes;
+                this.career.textContent = "The Innovator";
+            }
+            this.fitQuiz.classList.add('hidden');
+            this.emailDiv.classList.remove('hidden')
+        }
+        let currentQuestion = questionOrder[orderIndex];
+        question.textContent = questions[currentQuestion];
+ </script>

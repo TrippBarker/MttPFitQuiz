@@ -4,10 +4,10 @@
  
  <meta name="viewport" content="width=device-width" ,="" initial-scale="1.0">
  
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap" rel="stylesheet">
-<style>
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+ <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap" rel="stylesheet">
+ <style>
   #fitQuiz, #emailDiv, #fitResults {
             display: flex;
             flex-direction: column;
@@ -50,11 +50,9 @@
             height: 240px;
             text-align: center;
         }
-
         #congrats {
             display: inline;
         }
-
         #congrats a {
             text-decoration: none;
             display: inline-block;
@@ -64,16 +62,13 @@
             background-repeat: no-repeat;
             color: #1fcc00;
         }
-
         #congrats a:visited {
             color: #1fcc00;
         }
-
         #congrats a:hover {
             background-position: left 100% bottom 0;
             transition: background-position .5s;
         }
-
         #questionAns, #questionCtrls {
             display: flex;
             justify-content: center;
@@ -99,8 +94,36 @@
         .fitButton:disabled {
             opacity: 40%;
         }
-</style>
-<div id="fitQuiz">
+        @media (max-width: 900px){
+            #questionAns {
+                flex-direction: column !important;
+            }
+            #question, #career {
+                height: 140px !important;
+                font-size: 30px !important;
+            }
+
+            .fitButton {
+                font-size: 16px !important;
+                margin: .5rem !important;
+            }
+
+            #emailForm input {
+                font-size: 24px !important;
+                width: 300px !important;
+            }
+
+            #emailDiv h2 {
+                text-align: center;
+            }
+
+            #results, #congrats {
+                font-size: 24px !important;
+                height: 220px !important;
+            }
+        }
+ </style>
+ <div id="fitQuiz">
   <h1 id="question">
    Loading...
   </h1>
@@ -154,10 +177,14 @@
   <h2 id="results">
   </h2>
   <h2 id="congrats">
-    Congrats on your results! Now check out these&nbsp;<a href="https://www.medtotechpivot.com/industry-jobs">industry jobs</a>&nbsp;to see which ones are a fit for you.
+   Congrats on your results! Now check out these&nbsp;
+   <a href="https://www.medtotechpivot.com/industry-jobs">
+    industry jobs
+   </a>
+   &nbsp;to see which ones are a fit for you.
   </h2>
-</div>
-<script>
+ </div>
+ <script>
   let fitQuiz = document.getElementById('fitQuiz');
         let question = document.getElementById('question');
         let fitResults = document.getElementById('fitResults');
@@ -486,15 +513,23 @@
                 innovatorScore = 100;
             }
             if (probSolvScore >= leaderScore && probSolvScore >= commScore && probSolvScore >= innovatorScore) {
+                this.resText = probSolvRes;
+                this.resType = "The Problem Solver";
                 this.results.textContent = probSolvRes;
                 this.career.textContent = "The Problem Solver";
             } else if (leaderScore >= probSolvScore && leaderScore >= commScore && leaderScore >= innovatorScore) {
+                this.resText = leaderRes;
+                this.resType = "The Leader";
                 this.results.textContent = leaderRes;
                 this.career.textContent = "The Leader";
             } else if (commScore >= probSolvScore && commScore >= leaderScore && commScore >= innovatorScore) {
+                this.resText = commRes;
+                this.resType = "The Communicator";
                 this.results.textContent = commRes;
                 this.career.textContent = "The Communicator";
             } else {
+                this.resText = innovatorRes;
+                this.resType = "The Innovator";
                 this.results.textContent = innovatorRes;
                 this.career.textContent = "The Innovator";
             }
@@ -503,4 +538,4 @@
         }
         let currentQuestion = questionOrder[orderIndex];
         question.textContent = questions[currentQuestion];
-</script>
+ </script>
